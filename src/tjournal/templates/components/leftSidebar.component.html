@@ -1,0 +1,71 @@
+<aside class="aside_left d-flex user-select-none">
+    <div class="c_scroll aside_left_child">
+        <div style="height: var(--header-height);display: flex;">
+            <div class="header__left__sidebar_toggle my-auto px-3">
+                <button class="toggleSidebar fas fa-bars n-border-outline my-auto d-block"></button>
+            </div>
+            <div class="header__left__logo my-auto px-2">
+                <a {% if request.path != '' %}href="/"{% endif %}>
+                    {% include 'components/logo.component.html' with width='43px' %}
+                </a>
+            </div>
+        </div>
+        <div class="py-2 px-1">
+            <div class="aside_left__options mb-3">
+                {% for i in sidebar %}
+                <a class="side_elem link-blue text-color px-3 py-2 d-flex mb-2">
+                    <div class="icon-container">
+                        {{i.icon|safe}}
+                    </div>
+                    <span title="{{i.label}}" class="px-2 my-auto overflow-120">{{i.label}}</span>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="aside_left__users">
+                <div id="aside_left__users__fluid">
+
+                    {% if not_in_sidebar_user_list == True %}
+                    <div data-active="true" class="side_elem text-color px-3 mb-2 w-100 d-flex space-between" style="flex-direction: row-reverse;">
+                        <div class="icon-container d-block my-auto">
+                            {% if community %}
+                            <button data-who="pinned_community" data-user_id="{{community.pk}}" class="pin-action n-border-outline ripple fas fa-thumbtack" style="width: 50px; height: 50px;border-radius: 100%;color: #6c757d;"></button>
+                            {% else %}
+                            <button data-who="pinned_profile" data-user_id="{{page_profile.pk}}" class="pin-action n-border-outline ripple fas fa-thumbtack" style="width: 50px; height: 50px;border-radius: 100%;color: #6c757d;"></button>
+                            {% endif %}
+                        </div>
+                        <a href="/u/{{profile.pk}}/" class="d-flex d-block my-auto link-blue" style="flex: 1;">
+                            <div class="icon-container my-auto">
+                                {% if community %}
+                                {% include 'components/photo.component.html' with src=community.avatar dim='30px' bradius='5px' %}
+                                {% else %}
+                                {% include 'components/photo.component.html' with src=page_profile.avatar dim='30px' bradius='5px' %}
+                                {% endif %}
+                            </div>
+                            <span title="{% if community %}{{community.name}}{% else %}{{page_profile}}{% endif %}" class="px-2 my-auto overflow-120">{% if community %}{{community.name}}{% else %}{{page_profile}}{% endif %}</span>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% for x in sidebar_users %}
+                    {% for i in x %}
+                    <div {% if page_profile %}{% if i.pinned_profile == page_profile %}data-active="true"{% endif %}{% elif community %}{% if i.pinned_community == community %}data-active="true"{% endif %}{% endif %} class="side_elem text-color px-3 mb-2 w-100 d-flex space-between" style="flex-direction: row-reverse;">
+                        <div class="icon-container d-block my-auto">
+                            {% if not i.pinned %}
+                            <button data-who="{{i.get_type_string}}" data-user_id="{{i.get_type.pk}}" class="pin-action n-border-outline ripple fas fa-thumbtack" style="width: 50px; height: 50px;border-radius: 100%;color: #6c757d;"></button>
+                            {% else %}
+                            <button data-who="{{i.get_type_string}}" data-user_id="{{i.get_type.pk}}" class="pin-action n-border-outline ripple fas fa-thumbtack" style="width: 50px; height: 50px;border-radius: 100%;color: #0d6efd;"></button>
+                            {% endif %}
+                        </div>
+                        <a href="/u/{{i.get_type.pk}}/" class="d-flex d-block my-auto link-blue" style="flex: 1;">
+                            {% include 'components/photo.component.html' with src=i.get_type.avatar dim='30px' bradius='5px' %}
+                        <span title="{{i.get_type}}" class="px-2 my-auto overflow-120">{{i.get_type}}</span>
+                        </a>
+                    </div>
+                    {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="expire_sidebar aside_left_child" style="flex: 1;"></div>
+</aside>

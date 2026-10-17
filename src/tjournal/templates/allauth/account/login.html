@@ -1,0 +1,8 @@
+{% extends "account/base.html" %}
+{% block head_title %}Login{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    {% include 'components/login/login.component.html' with hide=false process='login' %}
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head id="head">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block head_title %}{% endblock %}</title>
+
+    <!-- Boostrap css -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x"
+        crossorigin="anonymous"
+    />
+
+    <!-- FontAwesome css -->
+    <link
+        rel="stylesheet"
+        href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+        crossorigin="anonymous"
+    />
+
+    <!-- Google font -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap"
+        rel="stylesheet"
+    />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+        rel="stylesheet"
+    />
+
+    {% load static %}
+
+    <!-- Custom css -->
+    <link rel="stylesheet" href="{% static 'css/global.css' %}" />
+
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}" />
+
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+
+    <!-- codex editor -->
+    <!-- fallback on no page reload -->
+    <link rel="stylesheet" href="{% static 'editor/css/editor.min.css' %}">
+    <link rel="stylesheet" href="{% static 'editor/css/editor_tooltip.min.css' %}">
+</head>
+
+<body>
+    <div id="change">
+        {% block extra_head %} {% endblock %}
+    </div>
+
+    {% csrf_token %}
+    {% include 'components/alert.component.html' %}
+    {% include 'components/header.component.html' %}
+    {% include 'components/leftSidebar.component.html' %}
+    {% include 'components/rightSidebar.component.html' %}
+    {% include 'components/askuser.component.html' %}
+    {% if request.user.is_authenticated %}
+        {% include 'components/chat.component.html' %}
+    {% endif %}
+    <div id="overlay_page" class="modal d-none d-flex" style="align-items: center;justify-content:center;background-color: rgba(0, 0, 0, 0.5);">
+        <div style="display: flex;align-items:center;justify-content:center;">
+            <span class="spinner-border d-block mt-5 spinner-border-sm text-white" role="status" aria-hidden="true" style="width: 5rem; height: 5rem;"></span>
+        </div>
+    </div>
+    <div id="content">
+        <div id="fluid">
+            {% if page_profile %}
+                <input type="hidden" id="receiver_pk" value="{{page_profile.user.pk}}">
+            {% elif community %}
+                <input type="hidden" id="receiver_pk" value="{{community.admin.pk}}">
+            {% endif %}
+            <input type="hidden" id="chat_pk" value="{{chat_pk}}">
+            <input type="hidden" id="our_pk" value="{{profile.user.pk}}">
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+
+<script src="{% static 'cropper/js/cropper.min.js' %}"></script>
+
+<script src="{% static 'editor/js/header.editor.js' %}"></script>
+<script src="{% static 'editor/js/list.editor.js' %}"></script>
+<script src="{% static 'editor/js/paragraph.editor.js' %}"></script>
+<script src="{% static 'editor/js/simple_image.editor.js' %}"></script>
+<script src="{% static 'editor/js/image.editor.js' %}"></script>
+<script src="{% static 'editor/js/embed.editor.js' %}"></script>
+<script src="{% static 'editor/js/code.editor.js' %}"></script>
+<script src="{% static 'editor/js/quote.editor.js' %}"></script>
+<script src="{% static 'editor/js/marker.editor.js' %}"></script>
+<script src="{% static 'editor/js/inline_code.editor.js' %}"></script>
+<script src="{% static 'editor/js/raw.editor.js' %}"></script>
+<script src="{% static 'editor/js/delimiter.editor.js' %}"></script>
+<script src="{% static 'editor/js/warning.editor.js' %}"></script>
+
+<script src="{% static 'editor/js/editor.min.js' %}"></script>
+
+<script src="{% static 'mustache/mustache.min.js' %}"></script>
+
+
+<script src="{% static 'js/global.js' %}"></script>
+{% if request.user.is_authenticated %}
+    <script src="{% static 'js/settings.js' %}"></script>
+{% endif %}
+<script>
+    let currChat;
+    let to_pk;
+</script>
+<script async defer src="{% static 'js/alive.js' %}"></script>
+<script src="{% static 'js/sidebar.js' %}"></script>
+<script src="{% static 'js/header.js' %}"></script>
+<script src="{% static 'js/post.js' %}"></script>
+<script src="{% static 'user/js/profile.js' %}"></script>
+{% if request.user.is_authenticated %}
+    <script src="{% static 'js/chat.js' %}"></script>
+{% endif %}
+<script src="{% static 'js/emoji.js' %}"></script>
+<script src="{% static 'js/editor.tjournal.js' %}"></script>
+<script src="{% static 'js/django-editor-fields.js' %}"></script>
+<script>
+    $(document).on('click', '.chat_toggle', (e) => {
+        if (document.querySelector('.chat_container').classList.toString().includes('d-none') || $('#chat_pk').val() != currChat) {
+            $('.chat_container').removeClass('d-none');
+            clearChat();
+            currChat = $('#chat_pk').val();
+            to_pk = $('#receiver_pk').val();
+            initChat();
+        }
+    });
+</script>
+
+</html>

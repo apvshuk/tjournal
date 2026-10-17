@@ -1,0 +1,87 @@
+.add_comment {
+    border: 1px solid transparent;
+    background-color: #f7f7f7;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+.add_comment:hover,
+.add_comment:focus-within {
+    box-shadow: 0 0 0 3px #c1dbff;
+    background-color: #fff;
+}
+.add_comment:focus-within {
+    border-color: deepskyblue;
+}
+.add_comment textarea {
+    border: none;
+    outline: none;
+    width: 100%;
+    margin-bottom: 10px;
+    background-color: inherit;
+}
+
+/* comment animation */
+@keyframes popout {
+    0% {
+        transform: scale(0.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+.popout_effect {
+    animation: popout;
+    animation-duration: 0.3s;
+}
+
+.unactioned {
+    opacity: 0;
+}
+
+.e_comment:hover .unactioned,
+.e_comment:hover .unactioned {
+    opacity: 1;
+}
+
+/* comment reply */
+.comment-tree .replies {
+    padding-left: 1em;
+}
+
+.comment-tree .replies .reply-content {
+    flex: 1;
+}
+
+.collapser {
+    width: 15px;
+    cursor: pointer;
+}
+
+.collapser-fluid {
+    width: 2px;
+    height: 100%;
+    background-color: #e5e5e5;
+}
+.collapser:hover .collapser-fluid {
+    background-color: #0d7bcd;
+}
+
+.newCommentAlert {
+    position: fixed;
+    left: 50px;
+    bottom: 50px;
+    border-radius: 100%;
+    width: 50px;
+    height: 50px;
+    background-color: #fff;
+    z-index: 200;
+    border: 1px solid #000;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.newCommentAlert:active {
+    transform: scale(0.85);
+}

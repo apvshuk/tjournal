@@ -1,0 +1,22 @@
+<div class="mail_signin">
+    <div class="mb-4">
+        <h5>Login via mail</h5>
+        or <a href="{% url 'account_signup' %}" class="via_mail_signup_btn anchor-reload">register</a>
+    </div>
+    <form method="POST" action="{% url 'account_login' %}" id="mail_signin_form">
+        {% csrf_token %}
+        <div class="mb-3">
+            <input type="text" name="login" placeholder="Username" autocomplete="username" maxlength="150" required id="id_login">
+        </div>
+        <div class="mb-3">
+            <input type="password" name="password" placeholder="Password" autocomplete="current-password" required id="id_password">
+        </div>
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+        <div class="d-flex" style="justify-content: space-between;">
+            <button type="submit" class="btn btn-primary">To come in</button>
+            <a class="anchor-reload link-underline-dotted" href="{% url 'account_reset_password' %}"><small>Forget password</small></a>
+        </div>
+    </form>
+</div>

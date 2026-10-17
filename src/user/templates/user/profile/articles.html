@@ -1,0 +1,60 @@
+{% extends 'user/profile/profile.html' %}
+
+{% block each_page_content %}
+
+<div class="filter user-select-none w-100 mb-3 mt-3 datapage" data-page="{{page}}" data-order="{{extra.filter_posts}}">
+    <a href="/u/{{page_profile.user.pk}}/" class="transp-btn text-dark {% if extra.filter_posts == 'fresh' %} bg-white btn-bx-s {% endif %}px-4 py-1 rounded-pill">Fresh</a>
+    <div class="dropdown my-auto">
+        <button id="popular_dropbtn" onclick="showDropdown('popular_filter_drop')" class="transp-btn px-4 py-1 rounded-pill mx-2 dropbtn{% if extra.filter_posts != 'fresh' %} bg-white btn-bx-s {% endif %}"><span>{{extra.popular_filter_name}}</span> <i class="fas fa-caret-down"></i></button>
+        <div id="popular_filter_drop" class="dropdown-content dropdown-content-left mt-2 px-1 py-1">
+            <div></div>
+            <a href="/u/{{page_profile.user.pk}}/popular/day/" class="text-start drop_elem w-100 transp-btn{% if extra.filter_posts == 'popular,day' %} bg-light {% endif %}">Per day</a>
+            <a href="/u/{{page_profile.user.pk}}/popular/week/" class="text-start drop_elem w-100 transp-btn{% if extra.filter_posts == 'popular,week' %} bg-light {% endif %}">During the week</a>
+            <a href="/u/{{page_profile.user.pk}}/popular/month/" class="text-start drop_elem w-100 transp-btn{% if extra.filter_posts == 'popular,month' %} bg-light {% endif %}">Per month</a>
+            <a href="/u/{{page_profile.user.pk}}/popular/year/" class="text-start drop_elem w-100 transp-btn{% if extra.filter_posts == 'popular,year' %} bg-light {% endif %}">In a year</a>
+            <a href="/u/{{page_profile.user.pk}}/popular/" class="text-start drop_elem w-100 transp-btn{% if extra.filter_posts == 'popular,all' %} bg-light {% endif %}">For all the time</a>
+        </div>
+    </div>
+</div>
+<div class="main_content d-flex space-between">
+    <div class="main_content_content user-select-none" style="width: fit-content;">
+        <div class="main_content_fluid" data-userpk="{{page_profile.user.pk}}"></div>
+        <div class="text-center d-none" id="postsLoader">
+            <span style="width: 40px;height: 40px;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        </div>
+        <input class="w-100 btn-bx-s btn transp-btn bg-white" id="loadPostsBtn" onclick="loadPost()" value="Load articles">
+    </div>
+    <div class="main_content_details mt-2" style="flex: 1;max-width: 250px;">
+        <div class="position-sticky">
+            <div class="details__followers bg-white d-block w-100 d">
+                <h6 class="head">Subscribers</h6>
+                {% if extra.subscribers %}
+                    <div>
+                        {% for x in extra.subscribers %}
+                            <img src="{{x.user.profile.avatar}}" alt="{{x.user.username}}" style="border-radius: 5px;width: 40px;height: 40px;" class="d-inline-block mb-1">
+                        {% endfor %}
+                    </div>
+                    <a class="d-block mt-3" href="">Show all</a>
+                {% else %}
+                <span class="user-select-none">{% if request.user == page_profile.user %}You don't have any subscribers{% else %}<span class="fw-bold">{{user.username}}</span> has no subscribers{% endif %}</span>
+                {% endif %}
+            </div>
+            {% if extra.social_accounts %}
+                <div class="details__links bg-white d-block w-100 d">
+                    <h6 class="head">Links and social accounts</h6>
+                    <div>
+                        {% for i in extra.social_accounts %}
+                            {% if i.href != None %}
+                                <a class="d-block" href="{{i.href}}"><i class="text-dark fab fa-{{i.provider}}"></i><span class="px-2">{{i.name}}</span></a>
+                            {% else %}
+                                <span class="user-select-none d-block"><i class="fab fa-{{i.provider}}"></i><span class="px-2">{{i.name}}</span></span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% load static %}
+
+<!-- Login Modal -->
+<div class="modal fade" id="login_modal" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background-color: rgba(0,0,0,.0001) !important;border: 0 !important;">
+            <div class="modal-body px-0 py-0">
+
+                {% include 'components/login/login.component.html' with hide=true %}
+
+            </div>
+        </div>
+    </div>
+</div>

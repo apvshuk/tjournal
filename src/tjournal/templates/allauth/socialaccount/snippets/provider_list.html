@@ -1,0 +1,43 @@
+{% load socialaccount %}
+{% get_providers as socialaccount_providers %}
+
+{% for i in socialaccount_providers %}
+{% if forloop.counter <= 2 %}
+
+<a href="{% provider_login_url i.id process=process scope=scope auth_params=auth_params %}" class="anchor-reload btn transp-btn btn-bx-s d-block w-100 d-flex mb-3">
+    <div class="icon_container">
+        <i class="fab fa-{{i.name.lower}}"></i>
+    </div>
+    {% if i.name == 'VK' %}
+    <span style="flex: 1;">In contact with</span>
+    {% else %}
+    <span style="flex: 1;">{{i.name}}</span>
+    {% endif %}
+</a>
+{% if forloop.counter == 2 and mail != 'hide' %}
+<button class="btn via_mail_signin_btn show_login_mail transp-btn btn-bx-s d-block w-100 d-flex mb-3">
+    <div class="icon_container">
+        <i class="far fa-envelope"></i>
+    </div>
+    <span style="flex: 1;">Via mail</span>
+</button>
+{% endif %}
+
+
+{% else %}
+
+
+{% if forloop.counter == 3 %}
+<div class="d-flex login__right__options__inline" style="justify-content: space-between;">
+{% endif %}
+<a href="{% provider_login_url i.id process=process scope=scope auth_params=auth_params %}" class="anchor-reload transp-btn btn-bx-s w-100 mb-3">
+    <div class="icon_container text-dark">
+        <i class="fab fa-{{i.name.lower}}"></i>
+    </div>
+</a>
+{% if forloop.last %}
+</div>
+{% endif %}
+
+{% endif %}
+{% endfor %}

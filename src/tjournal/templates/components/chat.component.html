@@ -1,0 +1,50 @@
+<div class="chat_container d-none">
+    <div class="chat_info d-flex space-between px-2 py-2 border-bottom">
+        <div class="d-flex">
+            <div class="chat_info__avatar px-2 my-auto">
+                {% include 'components/photo.component.html' with src=profile.avatar bradius="100%" %}
+            </div>
+            <div class="chat_info__name my-auto">
+                <span class="chat_name"></span>
+            </div>
+        </div>
+        <div class="d-flex">
+            <button class="px-3 d-block fas fa-ellipsis-h n-border-outline text-secondary"></button>
+            <button class="fas d-block fa-times n-border-outline text-secondary" id="close_chat"></button>
+        </div>
+    </div>
+    <div id="chatConnectAlert" class="bg-light px-1 py-2 text-center d-none">
+        <span id="retryCountdown"></span>
+        <button class="chatConnectRetry fw-bold transp-btn bg-white btn-bx-s mx-2">Retry now</button>
+    </div>
+    <div class="message_box"></div>
+    <div class="chat_fluid">
+        <div class="messageOptions border-top px-3 py-1 d-none">
+            <button class="messageReplyBtn transp-btn bg-white text-primary px-3 fw-normal" style="font-size: initial;"><i class="fa fa-reply"></i> Reply</button>
+            <button class="messageDeleteBtn transp-btn bg-white text-danger px-1 fw-normal" style="font-size: initial;"><i class="fa fa-trash"></i> Delete</button>
+        </div>
+        <div class="chat_fluid__send_box border-top px-3 py-1 d-flex">
+            <div class="my-auto">
+                <!-- file input -->
+                <input type="file" class="d-none" id="chat_file">
+                <label for="chat_file" class="fas fa-paperclip n-border-outline text-secondary" style="cursor: pointer;"></label>
+            </div>
+            <div class="my-auto" style="flex: 1;">
+                <!-- message input -->
+                <form id="chat_form">
+                    <input type="text" id="chat_input" class="n-border-outline" placeholder="Type a message...">
+                </form>
+            </div>
+            <div class="my-auto">
+                <!-- emoji -->
+                <div class="dropdown my-auto">
+                    <button onclick="showDropdown('emojiDrop')" class="far fa-laugh n-border-outline text-secondary dropbtn emojiTrigger"></button>
+                    <div id="emojiDrop" class="dropdown-content dropdown-content-bottom c_scroll text-center" style="width: 300px;bottom: 40px;">
+                        <input id="emojiSearch" type="text" class="mt-1" placeholder="Search emoji">
+                        <div id="emojiDropFluid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

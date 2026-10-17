@@ -1,0 +1,24 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Log Out from all devices" %}{% endblock %}
+
+{% block content %}
+<div class="container-box">
+  <div class="box-fluid">
+    <h1>{% trans "Log Out from all devices" %}</h1>
+
+    <p>{% trans 'Are you sure you want to log out from all devices?' %}</p>
+
+    <form method="post" action="{% url 'logout_all' %}">
+      {% csrf_token %}
+      {% if redirect_field_value %}
+      <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+      {% endif %}
+      <button class="transp-btn btn-bx-s" type="submit">{% trans 'Log Out from all devices' %}</button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block head_title %}{{page_profile.user.username}} - {{page.capitalize}} • TJ{% endblock %}
+
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'user/css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'cropper/css/cropper.min.css' %}">
+
+{% if page_profile.cover_art %}
+<style>
+    .profile_header_off {
+        position: relative;
+        bottom: var(--bottom-offset);
+    }
+</style>
+{% else %}
+<style>
+    .profile_avatar {
+        padding-top: 10px;
+    }
+</style>
+{% endif %}
+
+{% if profile != page_profile %}
+<script defer>
+    let interval = setTimeout(() => {
+        $.ajax({
+            url: `/update-favourite/${pk}/`,
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                'profile': Number('{{page_profile.pk}}'),
+            },
+            success: ( data ) => {
+                clearTimeout(interval);
+                $('.aside_left__users').load(window.location + ' #aside_left__users__fluid');
+            }
+        });
+    }, 60000);
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container px-5" style="max-width: 1050px;">
+    <div class="profile_header bg-white">
+        <div class="profile__header__visual mb-2 user-select-none">
+            <div class="profile__cover">
+                {% if page_profile.cover_art %}
+                    {% include 'components/photo.component.html' with src=page_profile.cover_art id="cover_uni" %}
+                {% endif %}
+            </div>
+            <div class="profile_avatar profile_header_off d-flex space-between px-4">
+                <div>
+                    {% if page_profile == profile %}
+                        <div class="avatar_container avatar_container_w">
+                            {% include 'components/photo.component.html' with src=page_profile.avatar bradius="10px" alt=user.username id="avatar_uni" %}
+                            <label for="avatar_update" style="cursor: pointer;" class="avatar_btn_w n-border-outline bg-white border border-1"><i class="fas fa-image"></i></label>
+                            <input type="file" id="avatar_update" class="d-none" accept="image/*">
+                        </div>
+                    {% endif %}
+                    {% if page_profile != profile %}
+                        <div class="avatar_container">
+                            {% include 'components/photo.component.html' with src=page_profile.avatar bradius="10px" alt=user.username %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mt-3">
+                    {% if page_profile == profile %}
+                        <a href="/accounts/settings/" class="d-inline-block text-dark transp-btn bg-white btn-bx-s px-3"><i class="fas fa-cog my-auto"></i></a>
+                        <label for="cover_update" style="cursor: pointer;" class="transp-btn bg-white btn-bx-s px-3">Change cover art</label>
+                        <input type="file" id="cover_update" class="d-none" accept="image/*">
+                    {% else %}
+                    <div class="dropdown my-auto">
+                        <button onclick="showDropdown('profile_ops_drop')" class="d-inline-block transp-btn dropbtn bg-white px-3 my-auto mx-2"><i class="fas fa-ellipsis-h my-auto"></i></button>
+                        <div id="profile_ops_drop" class="dropdown-content px-1 py-1 mt-2 dropdown-content-left">
+                            <button class="text-start drop_elem transp-btn w-100"><span class="my-auto px-2">Ignore</span></button>
+                        </div>
+                    </div>
+                        {% if subscribed == True %}
+                            <button class="subscribe-btn unsubscribe-hover subscribe-btn-{{page_profile.user.pk}} transp-btn btn-bx-s bg-white" data-subscribetopk="{{page_profile.user.pk}}"><i style="width: 10px;" data-subscribetopk="{{page_profile.user.pk}}" class="unsubscribe-hover-i fas fa-check text-success my-auto"></i><span class="unsubscribe-hover-span px-4 fm-roboto my-auto" data-subscribetopk="{{page_profile.user.pk}}">Subscribed</span></button>
+                            <div class="d-inline-block notification-container notification-container-{{page_profile.user.pk}}">
+                                <button class="notification-bell-user notification-bell-user-{{page_profile.user.pk}} transp-btn btn-bx-s bg-white px-3"><i class="far fa-bell my-auto"></i></button>
+                            </div>
+                        {% else %}
+                            <button class="subscribe-btn subscribe-btn-{{page_profile.user.pk}} transp-btn btn-bx-s bg-white" data-subscribetopk="{{page_profile.user.pk}}"><i style="width: 10px;" data-subscribetopk="{{page_profile.user.pk}}" class="fas fa-user-plus my-auto"></i><span class="px-4 fm-roboto my-auto" data-subscribetopk="{{page_profile.user.pk}}">Subscribe to</span></button>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if request.user.is_authenticated %}
+                        <button class="chat_toggle transp-btn mx-2 text-white blue_button btn-bx-s"><i class="far fa-comment-alt my-auto"></i><span class="px-3 fm-roboto my-auto">Write a message</span></button>
+                    {% else %}
+                        <button data-bs-toggle="modal" data-bs-target="#login_modal" class="show_login_options transp-btn mx-2 text-white blue_button btn-bx-s"><i class="far fa-comment-alt my-auto"></i><span class="px-3 fm-roboto my-auto">Write a message</span></button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="profile__header__description profile_header_off px-4">
+            <h2 class="fw-bold mb-3">{{page_profile.user.first_name}} {{page_profile.user.last_name}}</h2>
+            {% if page_profile == profile %}
+            <button class="link n-border-outline px-0 d-block mb-3">Change name or description</button>
+            {% endif %}
+            <span class="joined_date d-block mb-3">On project since <strong>{{page_profile.date}}</strong></span>
+        </div>
+
+        {% if not page_profile.cover_art %}
+            {% include 'components/profileNav.component.html' %}
+        {% endif %}
+    </div>
+
+    {% if page_profile.cover_art %}
+        {% include 'components/profileNav.component.html' %}
+    {% endif %}
+
+    {% if page_profile == profile %}
+    <div class="bg-white update-img-container d-none my-3 py-3 border">
+        <div class="update-img-fluid">
+            <div class="px-3">
+                <div>
+                    <img id="drag-image" style="width:100%;width: auto;height:auto;max-height: 80vh;" src="" alt=" ">
+                </div>
+            </div>
+            <p class="text-center mt-3"><button id="crop-submit" class="btn button-blue">Submit</button></p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div id="profile_content" style="{% if page_profile.cover_art %}position: relative;bottom: calc(var(--bottom-offset) - 10px);{% else %}margin-bottom: 15px;{% endif %}">
+        {% block each_page_content %}{% endblock %}
+    </div>
+</div>
+
+{% endblock %}

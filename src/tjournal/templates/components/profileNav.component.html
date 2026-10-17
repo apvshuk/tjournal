@@ -1,0 +1,7 @@
+<div class="profile__header__nav profile_header_off bg-white tabbed mt-5 py-0 px-4" style="{% if page_profile.cover_art %}padding-bottom: 1px!important;{% endif %}">
+    <ul class="c_scroll--nshow">
+        {% for i in tabs %}
+            <li class="{% if i.label.lower == page.lower %}active{% endif %}"><a class="link-blue text-dark" href="/u/{{page_profile.user.pk}}/{{i.href}}">{{i.label}}</a></li>
+        {% endfor %}
+    </ul>
+</div>

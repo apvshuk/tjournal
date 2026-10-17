@@ -1,0 +1,7 @@
+{% load static %}
+<img
+    src="{% static 'images/logo.svg' %}"
+    alt=""
+    width="{% if width %}{{width}}{% else %}50px{% endif %}"
+    height="auto"
+/>

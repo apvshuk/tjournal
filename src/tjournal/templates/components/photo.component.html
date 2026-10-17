@@ -1,0 +1,28 @@
+{% if 'http' in src.url %}
+<img
+    src="{% if src %}{{src}}{% endif %}"
+    alt="{% if alt %}{{alt}}{% endif %}"
+    width="{% if dim %}{{dim}}{% else %}100%{% endif %}"
+    height="{% if dim %}{{dim}}{% else %}auto{% endif %}"
+    {% if id %}id="{{id}}"{% endif %}
+    style="border-radius: {% if bradius %}{{bradius}}{% else %}0{% endif %}"
+/>
+{% elif 'default_profile' in src.url and 'static' in src.url %}
+<img
+    src="{% if src %}{{src}}{% endif %}"
+    alt="{% if alt %}{{alt}}{% endif %}"
+    width="{% if dim %}{{dim}}{% else %}100%{% endif %}"
+    height="{% if dim %}{{dim}}{% else %}auto{% endif %}"
+    {% if id %}id="{{id}}"{% endif %}
+    style="border-radius: {% if bradius %}{{bradius}}{% else %}0{% endif %}"
+/>
+{% else %}
+<img
+    src="{% if src %}{{src.url}}{% endif %}"
+    alt="{% if alt %}{{alt}}{% endif %}"
+    width="{% if dim %}{{dim}}{% else %}100%{% endif %}"
+    height="{% if dim %}{{dim}}{% else %}auto{% endif %}"
+    {% if id %}id="{{id}}"{% endif %}
+    style="border-radius: {% if bradius %}{{bradius}}{% else %}0{% endif %}"
+/>
+{% endif %}

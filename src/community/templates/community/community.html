@@ -1,0 +1,88 @@
+<!-- {% extends 'components/profile.component.html' %}
+{% load static %}
+
+{% block head_title_1 %} {{community.name}} {% endblock %}
+
+{% block extra_head_1 %}
+
+{% if community.cover_art %}
+<style>
+    .profile_header_off {
+        position: relative;
+        bottom: var(--bottom-offset);
+    }
+</style>
+{% else %}
+<style>
+    .profile_avatar {
+        padding-top: 10px;
+    }
+</style>
+{% endif %}
+
+<script defer>
+    let interval = setTimeout(() => {
+        $.ajax({
+            url: `/update-favourite/${pk}/`,
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                'community': Number('{{community.pk}}'),
+            },
+            success: ( data ) => {
+                clearTimeout(interval);
+                $('.aside_left__users').load(window.location + ' #aside_left__users__fluid');
+            }
+        });
+    }, 60000);
+</script>
+
+{% endblock %}
+
+{% block avatar_w %}
+{% if community.admin == profile.user %}
+<div class="avatar_container avatar_container_w">
+    {% include 'components/photo.component.html' with src=community.avatar bradius="10px" alt=user.username id="avatar_uni" %}
+    <label for="avatar_update" style="cursor: pointer;" class="avatar_btn_w n-border-outline bg-white border border-1"><i class="fas fa-image"></i></label>
+    <input type="file" id="avatar_update" class="d-none" accept="image/*">
+</div>
+{% endif %}
+{% endblock avatar_w %}
+
+{% block avatar %}
+{% if community.admin != profile.user %}
+<div class="avatar_container">
+    {% include 'components/photo.component.html' with src=community.avatar bradius="10px" alt=user.username %}
+</div>
+{% endif %}
+{% endblock avatar %}
+
+{% block cover %}
+{% if community.cover_art %}
+{% include 'components/photo.component.html' with src=community.cover_art id="cover_uni" %}
+{% endif %}
+{% endblock cover %}
+
+{% block first_last_name %}
+{{community.name}}
+{% endblock first_last_name %}
+
+{% block navigation_in %}
+{% if not community.cover_art %}
+{% include 'components/profileNav.component.html' %}
+{% endif %}
+{% endblock navigation_in %}
+
+{% block navigation_out %}
+{% if community.cover_art %}
+{% include 'components/profileNav.component.html' %}
+{% endif %}
+{% endblock navigation_out %}
+
+{% block options %}
+{% if community.admin == profile.user %}
+<button class="transp-btn bg-white btn-bx-s px-3"><i class="fas fa-cog my-auto"></i></button>
+<label for="cover_update" style="cursor: pointer;" class="transp-btn bg-white btn-bx-s px-3">Change cover art</label>
+<input type="file" id="cover_update" class="d-none" accept="image/*">
+{% endif %}
+{% endblock options %} -->

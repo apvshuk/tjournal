@@ -1,0 +1,93 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}Signup{% endblock %}
+
+{% block extra_head %}
+
+<style>
+    .signup {
+        width: 350px;
+    }
+    @media screen and (max-width: 400px) {
+        .signup {
+            width: 100%;
+            padding: 0!important;
+        }
+        .border {
+            border: 0;
+        }
+        .container {
+            padding: 0!important;
+            margin: 0!important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="signup mx-auto py-3 px-3 border bg-white">
+        <h5 class="mb-3">Sign up via mail</h5>
+        <form class="signup__form" id="signup_form" method="POST" action="{% url 'account_signup' %}">
+            {% csrf_token %}
+            {{form.as_p}}
+            {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+            <div class="mb-3">
+                <button type="submit" class="submit_signup btn btn-primary d-block w-100">Sign up</button>
+            </div>
+        </form>
+        <div class="mb-3 text-center">
+            Already have an account? <a class="anchor-reload" href="{{ login_url }}">Login</a>
+        </div>
+    </div>
+</div>
+
+<script defer>
+    $(document).on('submit', '#signup_form', (e) => {
+        e.preventDefault();
+        let formData = new FormData();
+        formData.append('email', document.getElementsByName('email')[0].value);
+        formData.append('username', document.getElementsByName('username')[0].value);
+        formData.append('first_name', document.getElementsByName('first_name')[0].value);
+        formData.append('last_name', document.getElementsByName('last_name')[0].value);
+        formData.append('password1', document.getElementsByName('password1')[0].value);
+        formData.append('password2', document.getElementsByName('password2')[0].value);
+        formData.append('csrfmiddlewaretoken', document.getElementsByName('csrfmiddlewaretoken')[0].value);
+        $.ajax({
+            method: "POST",
+            url: $('#signup_form').attr('action'),
+            data: formData,
+            enctype: 'multipart/form-data',
+            success: (data) => {
+                let next_ = new URL(window.location).searchParams.get('next');
+                if (next_ != undefined) {
+                    window.location = next_;
+                } else {
+                    window.location = '/';
+                }
+            },
+            error: (error) => {
+                for (let i in error.responseJSON.form.fields) {
+                    for (let j of error.responseJSON.form.fields[i].errors) {
+                        $(`input[name=${i}]`).parent().append(`
+                            <span class="alerts_signup text-danger d-block mb-1 fw-bold">${j}</span>
+                        `);
+                    }
+                }
+                document.querySelector('.submit_signup').disabled = false;
+            },
+            beforeSend: () => {
+                document.querySelector('.submit_signup').disabled = true;
+                $('.alerts_signup').remove();
+            },
+            cache: false,
+            contentType: false,
+            processData: false,
+        });
+    });
+</script>
+{% endblock %}

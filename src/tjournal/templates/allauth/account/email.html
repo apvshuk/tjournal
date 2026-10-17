@@ -1,0 +1,206 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% block head_title %}{% trans "E-mail Addresses" %}{% endblock %}
+
+{% block content %}
+<div class="container-box">
+    <button id="refresh_mails" class="transp-btn bg-white my-auto btn-bx-s fas fa-redo" style="font-weight: bold;position: absolute;right: 2em;bottom: 2em;font-size: 1.5em;"></button>
+    <div class="box-fluid">
+        <h1>{% trans "E-mail Addresses" %}</h1>
+        {% if user.emailaddress_set.all %}
+        <p>
+            {% trans 'The following e-mail addresses are associated with your account:' %}
+        </p>
+
+        <form action="{% url 'account_email' %}" id="email_list" method="POST">
+            {% csrf_token %}
+            <fieldset class="blockLabels">
+                <div class="ctrlParent">
+                    {% for emailaddress in user.emailaddress_set.all %}
+                    <div class="ctrlHolder">
+                        <label
+                        for="email_radio_{{forloop.counter}}"
+                            class="{%if emailaddress.primary %}primary_email{% endif %}">
+                            <input class="email_s" id="email_radio_{{forloop.counter}}" type="radio" name="email" {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked="checked"{%endif %} value="{{emailaddress.email}}"/>
+                            {{ emailaddress.email }}
+                            {% if emailaddress.verified %}
+                            <span class="verified badge rounded-pill bg-primary">{% trans "Verified" %}</span>
+                            {% else %}
+                            <span class="unverified badge rounded-pill bg-dark">{% trans "Unverified" %}</span>
+                            {% endif %} {% if emailaddress.primary %}<span class="primary badge rounded-pill bg-secondary">{% trans "Primary" %}</span>{% endif %}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="buttonHolder my-3">
+                    <button
+                        class="secondaryAction transp-btn btn-bx-s"
+                        type="submit"
+                        name="action_primary">
+                        {% trans 'Make Primary' %}
+                    </button>
+                    <button
+                        class="secondaryAction transp-btn btn-bx-s"
+                        type="submit"
+                        name="action_send">
+                        {% trans 'Re-send Verification' %}
+                    </button>
+                    <button
+                        class="primaryAction transp-btn btn-bx-s"
+                        type="submit"
+                        name="action_remove">
+                        {% trans 'Remove' %}
+                    </button>
+                </div>
+            </fieldset>
+        </form>
+
+        {% else %}
+        <p>
+            <strong>{% trans 'Warning:'%}</strong> {% trans "You currently do
+            not have any e-mail address set up. You should really add an e-mail
+            address so you can receive notifications, reset your password, etc."
+            %}
+        </p>
+
+        {% endif %} {% if can_add_email %}
+        <h2>{% trans "Add E-mail Address" %}</h2>
+
+        <form
+            method="POST"
+            action="{% url 'account_email' %}"
+            id="add_email"
+        >
+            {% csrf_token %} {{ form.as_p }}
+            <button class="transp-btn btn-bx-s" name="action_add" type="submit" id="submit_add_email">
+                {% trans "Add E-mail" %}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<script defer>
+    function renderEmails(arr) {
+        let el = $('.ctrlParent');
+        el.html('');
+        for (let i in arr) {
+            el.append(`
+                <div class="ctrlHolder">
+                    <label
+                    for="email_radio_${i}"
+                        class=${arr[i].primary ? "primary_email" : ""}>
+                        <input class="email_s" id="email_radio_${i}" type="radio" name="email" ${i == 0 ? `checked="checked"` : ``} value="${arr[i].email}"/>
+                        ${ arr[i].email }
+                        ${arr[i].verified === true ? `<span class="verified badge rounded-pill bg-primary">Verified</span>`:
+                            `<span class="unverified badge rounded-pill bg-dark">Unverified</span>`}
+                        ${arr[i].primary === true ? `<span class="primary badge rounded-pill bg-secondary">Primary</span>` : ``}
+                    </label>
+                </div>
+            `);
+        }
+    }
+    let emailListClick;
+    // current button state
+    $(document).on('click', 'button[name=action_primary]', (e) => {emailListClick = 'action_primary'});
+    $(document).on('click', 'button[name=action_send]', (e) => {emailListClick = 'action_send'});
+    $(document).on('click', 'button[name=action_remove]', (e) => {emailListClick = 'action_remove'});
+    $(document).on('submit', '#email_list', (e) => {
+        e.preventDefault();
+        let formData = new FormData();
+        formData.append('email', $('.email_s:checked').val());
+        formData.append(emailListClick, emailListClick);
+        formData.append('csrfmiddlewaretoken', document.getElementsByName('csrfmiddlewaretoken')[0].value);
+        emailListClick = undefined;
+        $.ajax({
+            method: 'POST',
+            url: $('#email_list').attr('action'),
+            data: formData,
+            enctype: 'multipart/form-data',
+            success: (data) => {
+                renderEmails(data.data);
+                $('.primaryAction,.secondaryAction').attr('disabled', false);
+            },
+            error: (error) => {
+                for (let i in error.responseJSON.form.fields) {
+                    for (let j of error.responseJSON.form.fields[i].errors) {
+                        $(`input[name=${i}]`).parent().append(`
+                            <span class="alerts_email text-danger d-block mb-1 fw-bold">${j}</span>
+                        `);
+                    }
+                }
+                $('.primaryAction,.secondaryAction').attr('disabled', false);
+            },
+            beforeSend: () => {
+                $('.primaryAction,.secondaryAction').attr('disabled', true);
+                $('.alerts_email').remove();
+            },
+            cache: false,
+            contentType: false,
+            processData: false,
+        });
+    });
+    $(document).on('submit', '#add_email', (e) => {
+        e.preventDefault();
+        let formData = new FormData();
+        formData.append('email', $('#id_email').val());
+        formData.append('action_add', 'action_add');
+        formData.append('csrfmiddlewaretoken', document.getElementsByName('csrfmiddlewaretoken')[0].value);
+        $.ajax({
+            method: "POST",
+            url: $('#add_email').attr('action'),
+            data: formData,
+            enctype: 'multipart/form-data',
+            success: (data) => {
+                renderEmails(data.data);
+                $('#id_email').val('');
+                $('#submit_add_email').attr('disabled', false);
+            },
+            error: (error) => {
+                for (let i in error.responseJSON.form.fields) {
+                    for (let j of error.responseJSON.form.fields[i].errors) {
+                        $(`#id_email`).parent().append(`
+                            <span class="alerts_add_email text-danger d-block mb-1 fw-bold">${j}</span>
+                        `);
+                    }
+                }
+                $('#submit_add_email').attr('disabled', false);
+            },
+            beforeSend: () => {
+                $('#submit_add_email').attr('disabled', true);
+                $('.alerts_add_email').remove();
+            },
+            cache: false,
+            contentType: false,
+            processData: false,
+        });
+    });
+    $(document).on('click', '#refresh_mails', (e) => {
+        $.ajax({
+            method: "POST",
+            url: $('#add_email').attr('action'),
+            data: {
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken').val(),
+            },
+            success: (data) => {
+                renderEmails(data.data);
+                $('#refresh_mails').attr('disabled', false);
+                $('#submit_add_email').attr('disabled', false);
+                $('.primaryAction,.secondaryAction').attr('disabled', false);
+            },
+            error: (error) => {
+                showAlert();
+                $('#refresh_mails').attr('disabled', false);
+                $('#submit_add_email').attr('disabled', false);
+                $('.primaryAction,.secondaryAction').attr('disabled', false);
+            },
+            beforeSend: () => {
+                $('#refresh_mails').attr('disabled', true);
+                $('#submit_add_email').attr('disabled', true);
+                $('.primaryAction,.secondaryAction').attr('disabled', true);
+            },
+        });
+    });
+</script>
+{% endblock %}

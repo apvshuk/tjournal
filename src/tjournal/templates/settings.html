@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block head_title %}Tjournal{% endblock %}
+
+{% block extra_head %}
+<!-- add css and others (warning: no javascript to be added here) -->
+{% endblock %}
+
+{% block content %}
+
+<div class="container user-select-none" style="max-width: 730px;">
+    <div class="bg-white mt-2 mx-auto mb-4">
+        <div class="e_setting_h">
+            <h2 class="my-auto">User Settings</h2>
+        </div>
+        <div class="e_setting">
+            <span class="head mb-3">Paid account</span>
+			<div class="e_setting--block">
+				<a href="/accounts/plus/" class="transp-btn blue_button text-white btn-lg d-inline-block">Buy for 75₽</a>
+			</div>
+        </div>
+        <div class="e_setting">
+            <span class="head mb-3">Basic Settings</span>
+            <div class="e_setting--block">
+                <div class="label">
+                    <label for="settings--nickname">Nickname</label>
+                </div>
+                <div class="content">
+                    <div class="d-flex nickname_block">
+                        <input type="text" style="flex: 1;" id="settings--nickname" value="{{profile.user.username}}">
+                        <a href="/accounts/plus/" class="my-auto link-underline-dotted" style="margin-left: 10px;">Change</a>
+                    </div>
+                </div>
+            </div>
+            <div class="e_setting--block">
+                <div class="label">
+                    <label for="settings--first-name">First name</label>
+                </div>
+                <div class="content">
+                    <input type="text" style="flex: 1;" id="settings--first-name" value="{{profile.user.first_name}}">
+                </div>
+            </div>
+            <div class="e_setting--block">
+                <div class="label">
+                    <label for="settings--last-name">Last name</label>
+                </div>
+                <div class="content">
+                    <input type="text" style="flex: 1;" id="settings--last-name" value="{{profile.user.last_name}}">
+                </div>
+            </div>
+            <div class="e_setting--block">
+                <div class="label">
+                    <label for="settings--show-online">Show when online</label>
+                </div>
+                <div class="content">
+                    <input type="checkbox" id="settings--show-online"{% if basic_settings.show_when_online == True %} checked{% endif %}>
+                </div>
+            </div>
+            <div class="e_setting--block">
+                <div class="label">
+                    <label for="settings--spbptso">Show personal blog posts to subscribers only</label>
+                </div>
+                <div class="content">
+                    <input type="checkbox" id="settings--spbptso"{% if basic_settings.personal_blog_to_subscribers_only == True %} checked{% endif %}>
+                </div>
+            </div>
+            <div class="e_setting--block">
+                <div class="label">
+                    <label for="settings--default-ribbon">Default ribbon</label>
+                </div>
+                <div class="content">
+                    <select id="settings--default-ribbon" class="w-100">
+                        {% for x in ribbons %}
+                            <option value="{{x}}"{% if x == basic_settings.default_ribbon %} selected{% endif %}>{{x}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="e_setting e_setting--checks">
+            <div class="d-flex space-between">
+                <div style="flex: 1;">
+                    <span class="head mb-3">Notifications</span>
+                </div>
+                <div class="d-flex">
+                    <i class="d-block fas fa-mail-bulk" style="width: 30px;"></i>
+                    <div class="mx-3"></div>
+                    <i class="d-block fas fa-bell" style="width: 23px;"></i>
+                </div>
+            </div>
+            {% for key, value in notifications_settings.items %}
+            <div class="d-flex space-between">
+                <div style="flex: 1;">
+                    <span>{{value.label}}</span>
+                </div>
+                <div class="d-flex">
+                    <input data-label_pure="{{value.label}}" data-label="{{key}}" class="notification-inp notification-mail" type="checkbox"{% if value.m == True %} checked{% endif %}>
+                    <div class="mx-3"></div>
+                    <input data-label_pure="{{value.label}}" data-label="{{key}}" class="notification-inp notification-notification" type="checkbox"{% if value.n == True %} checked{% endif %}>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="save_changes--settings">
+            <button class="transp-btn blue_button text-white d-inline-block" id="settings_save_change_btn">Save above changes</button>
+        </div>
+        <div class="e_setting">
+            <span class="head mb-3">Black List</span>
+            <div class="e_setting--block">
+                <div class="label">
+                    <label for="settings--blacklist-user">Users</label>
+                </div>
+                <div class="content">
+                    <input type="text" id="settings--blacklist-user" placeholder="Enter a nickname">
+                    <div style="position: relative;z-index: 100;" class="blacklist-user-dropdown">
+                        <div class="blacklist-user-dropdown-fluid d-none w-100 bg-white border-bottom border-start border-end" style="position: absolute;box-shadow: 0 1px 2px #444;"></div>
+                    </div>
+                    <div class="mt-1 blacklist-user-div"></div>
+                </div>
+            </div>
+            <div class="e_setting--block">
+                <div class="label">
+                    <label for="settings--blacklist-post">Hide posts with words</label>
+                </div>
+                <div class="content">
+                    <input type="text" id="settings--blacklist-post" placeholder="Enter a word">
+                    <div class="mt-1">
+                        {% for x in blacklist.hide_posts_with_words %}
+                            <span class="badge badge-pill" style="background-color: #4683d9;">{{x}}<button type="button" class="btn-close bg-white px-1 py-1" aria-label="Close" style="font-size: 0.8em;margin-left: 4px;"></button></span>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-1 blacklist-words-div"></div>
+                </div>
+            </div>
+        </div>
+        <div class="e_setting">
+            <span class="head mb-3">Logout</span>
+			<div class="e_setting--block">
+				<form action="/accounts/logout/" method="POST" class="d-inline-block">
+					{% csrf_token %}
+					<button class="transp-btn bg-danger text-white d-inline-block">Logout</button>
+				</form>
+				<form action="/accounts/logout_all/" method="POST" class="d-inline-block mx-2">
+					{% csrf_token %}
+					<button class="transp-btn bg-danger text-white d-inline-block">Logout from all devices</button>
+				</form>
+			</div>
+        </div>
+    </div>
+	<div class="bg-white mt-4 mx-auto mb-2">
+	    <div class="e_setting_h">
+            <h2 class="my-auto">Account Settings</h2>
+        </div>
+		<div class="e_setting">
+		    <span class="head mb-3">Password</span>
+            {% if user.has_usable_password %}
+                <div class="e_setting--block">
+                    <a target="_blank" class="anchor-reload" href="/accounts/password/change/">Change password</a>
+                    <a target="_blank" href="/accounts/password/reset/" class="mx-3 anchor-reload">Forgot password</a>
+                </div>
+            {% else %}
+                <span class="d-block">You don't already have a password set up. Create a password for your account <a target="_blank" href="/accounts/password/set/">here</a></span>
+            {% endif %}
+		</div>
+		<div class="e_setting">
+		    <span class="head mb-3">Email</span>
+			<div class="e_setting--block">
+				<a target="_blank" href="/accounts/email/" class="anchor-reload">Emails associated with your account</a>
+			</div>
+		</div>
+	</div>
+    <div class="bg-white mt-4 mx-auto mb-2">
+        <div class="e_setting_h">
+            <h2 class="my-auto">Social Connections</h2>
+        </div>
+        <div class="e_setting">
+            <span class="head mb-3">Connected Social Accounts</span>
+            <div class="social_acc_box">
+                {% if social_accounts %}
+                    {% for i in social_accounts %}
+                        <span class="bg-danger badge d-inline-block my-1"><span class="fw-bold">{{i.provider}} - {{i.name}}</span><button type="button" data-id="{{i.id}}" class="social-one btn-close bg-white px-1 py-1" aria-label="Close" style="font-size: 0.8em;margin-left: 4px;"></button></span>
+                    {% endfor %}
+                {% else %}
+                <span>You don't have any social accounts connected</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="e_setting" id="add-social-account">
+            <span class="head mb-3">Add Social Account</span>
+            <div>
+                {% include "components/login/login.component.html" with hide=true img='hide' border='hide' process='connect' mail='hide' %}
+                {% include "socialaccount/snippets/login_extra.html" %}
+            </div>
+        </div>
+	</div>
+</div>
+
+{% endblock %}

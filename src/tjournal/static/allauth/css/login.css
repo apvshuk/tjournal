@@ -1,0 +1,41 @@
+.login {
+    max-height: 100%;
+    max-width: 100%;
+    height: 600px;
+    width: 700px;
+}
+
+.login__left img {
+    height: 100%;
+    width: auto;
+}
+
+.login__options {
+    height: 100%;
+    flex: 1;
+}
+
+.login__right__options {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login__right__options__inline :first-child {
+    margin-right: 10px;
+}
+
+.login__right__options__inline :last-child {
+    margin-left: 10px;
+}
+
+.login__right__options__inline .transp-btn .icon_container {
+    width: auto;
+}
+
+@media screen and (max-width: 770px) {
+    .login__left {
+        display: none;
+    }
+}

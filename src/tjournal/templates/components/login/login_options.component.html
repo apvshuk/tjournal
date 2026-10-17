@@ -1,0 +1,12 @@
+<div class="signin_options">
+    {% if mail != 'hide' %}
+        <div class="mb-4">
+            <h5>Login to TJ</h5>
+        </div>
+    {% endif %}
+    {% if process %}
+        {% include "socialaccount/snippets/provider_list.html" with mail=mail process=process %}
+    {% else %}
+        {% include "socialaccount/snippets/provider_list.html" with mail=mail process='login' %}
+    {% endif %}
+</div>

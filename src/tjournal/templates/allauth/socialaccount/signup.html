@@ -1,0 +1,86 @@
+<!-- ............This page is to be fixed............ -->
+
+{% extends "socialaccount/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+<div class="container-box">
+    <div class="box-fluid">
+        <h1>{% trans "Sign Up" %}</h1>
+
+        <p>
+            {% blocktrans with provider_name=account.get_provider.name
+            site_name=site.name %}You are about to use your {{provider_name}}
+            account to login to {{site_name}}. As a final step, please complete
+            the following form:{% endblocktrans %}
+        </p>
+
+        <form
+            class="signup"
+            id="signup_form"
+            method="post"
+            action="{% url 'socialaccount_signup' %}"
+        >
+            {% csrf_token %} {{ form.as_p }} {% if redirect_field_value %}
+            <input
+                type="hidden"
+                name="{{ redirect_field_name }}"
+                value="{{ redirect_field_value }}"
+            />
+            {% endif %}
+            <button
+                id="submit_social_signup"
+                class="transp-btn btn-bx-s"
+                type="submit"
+            >
+                {% trans "Sign Up" %} &raquo;
+            </button>
+        </form>
+    </div>
+</div>
+
+<script defer>
+    $(document).on("submit", "#signup_form", (e) => {
+        e.preventDefault();
+        let formData = new FormData();
+        formData.append("email", $("input[name=email]").val());
+        formData.append("username", $("input[name=username]").val());
+        formData.append(
+            "csrfmiddlewaretoken",
+            $("input[name=csrfmiddlewaretoken]").val()
+        );
+        $.ajax({
+            method: "POST",
+            url: $("#signup_form").attr("action"),
+            data: formData,
+            enctype: "multipart/form-data",
+            success: (data) => {
+                window.location = data.location;
+            },
+            error: (error) => {
+                try {
+                    for (let i in error.responseJSON.form.fields) {
+                        for (let j of error.responseJSON.form.fields[i].errors) {
+                            $(`input[name=${i}]`).parent().append(`<span class="alerts_social_signup text-danger d-block mb-1 fw-bold">${j}</span>`);
+                        }
+                    }
+                } catch {
+                    showAlert(error.statusText);
+                }
+                console.log(error);
+                $("#submit_social_signup").attr("disabled", false);
+            },
+            beforeSend: () => {
+                $("#submit_social_signup").attr("disabled", true);
+                $(".alerts_social_signup").remove();
+            },
+            cache: false,
+            contentType: false,
+            processData: false,
+        });
+    });
+</script>
+{% endblock %}

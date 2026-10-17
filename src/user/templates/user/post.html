@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load editorjs_renderer %}
+{% load validate_bookmark %}
+{% load validate_vote %}
+
+{% block head_title %}Tjournal{% endblock %}
+
+{% block extra_head %}
+<!-- add css and others (warning: no javascript to be added here) -->
+<link rel="stylesheet" href="{% static 'user/css/post.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container" style="max-width: 1000px;">
+    <div class="newCommentAlert d-none">
+        <i class="fas fa-arrow-up d-block"></i>
+        <i class="fas fa-arrow-down d-block"></i>
+        <span class="newCommentAlertNumber position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"></span>
+    </div>
+    <div id="post_content" class="bg-white mt-2 px-3 py-4 mx-auto">
+        <div class="top_header px-3 d-flex space-between user-select-none">
+            <a href="/u/{{page_profile.user.pk}}/" class="d-flex my-auto">
+                <div class="my-auto">
+                    {% include 'components/photo.component.html' with src=page_profile.avatar alt=profile.user.username dim="30px" bradius="5px" %}
+                </div>
+                <div class="mx-2 my-auto d-flex">
+                    <span style="font-size: 1.1rem;" class="d-block fw-bold">{{page_profile.user.username}}</span>
+                    <span style="font-size: 1.1rem;" class="text-secondary d-block mx-3">{{page_post.date}} @ {{page_post.time}}</span>
+                </div>
+            </a>
+            <div class="d-flex my-auto">
+                <div class="dropdown my-auto">
+                    <button onclick="showDropdown('post_drop')" class="fs-4 dropbtn fas fa-ellipsis-h n-border-outline"></button>
+                    <div id="post_drop" class="dropdown-content">
+                        <div></div>
+                        {% if profile == page_profile %}
+                            <button data-pk="{{page_post.pk}}" class="edit_post drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Edit</button>
+                            <button class="drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Promote</button>
+                            {% if page_post.published == True %}
+                                <button data-pk="{{page_post.pk}}" class="make_post_private drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Unpublish</button>
+                            {% else %}
+                                <button data-pk="{{page_post.pk}}" class="make_post_public drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Make public</button>
+                            {% endif %}
+                            <button data-pk="{{page_post.pk}}" class="delete_post drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Delete</button>
+                            {% if page_post.published == True %}
+                                {% if page_post.anchored == True %}
+                                    <button data-pk="{{page_post.pk}}" class="unanchor_post drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Unanchor</button>
+                                {% else %}
+                                    <button data-pk="{{page_post.pk}}" class="anchor_post drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Anchor</button>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <button class="drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Hide</button>
+                        {% endif %}
+                        <button class="drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Complain</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if page_post.published == False %}
+            <small class="px-3">This post is saved in your draft. Only you can see this</small>
+            <button class="btn-sm py-0 btn-bx-s transp-btn bg-white make_post_public" data-pk="{{page_post.pk}}">Make Public</button>
+        {% endif %}
+        <div class="bottom_content px-3 mt-4">
+            {{page_post.content|editorjs_renderer}}
+        </div>
+
+        <!-- upvote downvote etc. here -->
+        <div class="_post__bottom mt-4 d-flex space-between user-select-none" style="font-size: 1.2rem;">
+            <div class="_post__bottom__left">
+                <button class="mx-3 n-border-outline" style="font-size: 1.1rem;">
+                    <span class="n-border-outline far fa-comment px-0 py-0"></span>
+                    <span class="px-1 py-0 comment_count comment_count_{{page_post.pk}}">{{comment_count}}</span>
+                </button>
+
+                {% if request.user.is_authenticated %}
+                    {% validate_bookmark page_post request.user as bookmarked %}
+                    <div class="d-inline-block mx-3">
+                        {% if bookmarked.0 %}
+                        <button data-postpk="{{page_post.pk}}" class="bookmarkBtn-{{page_post.pk}} fw-bold bookmarkBtn n-border-outline n-border-outline far fa-bookmark px-0 py-0" style="font-size: 1.1rem;"></button>
+                        {% else %}
+                        <button data-postpk="{{page_post.pk}}" class="bookmarkBtn-{{page_post.pk}} bookmarkBtn n-border-outline n-border-outline far fa-bookmark px-0 py-0" style="font-size: 1.1rem;"></button>
+                        {% endif %}
+                        <span class="bookmark_count px-1">{{bookmarked.1}}</span>
+                    </div>
+                {% else %}
+                    <button data-bs-toggle="modal" data-bs-target="#login_modal" class="show_login_options mx-3 n-border-outline n-border-outline far fa-bookmark px-0 py-0" style="font-size: 1.1rem;"></button>
+                {% endif %}
+
+                <button class="mx-3 n-border-outline n-border-outline fas fa-share px-0 py-0" style="font-size: 1.1rem;"></button>
+            </div>
+            <div class="_post__bottom__right">
+                {% if request.user.is_authenticated %}
+                    {% validate_vote page_post request.user as voted %}
+                    {% if voted.0 == True %}
+                    <button class="{{page_post.pk}}-downvotebtn text-primary downvoteBtn voteBtn fas fa-chevron-down mx-3 n-border-outline" style="font-size: 1.1rem;" data-votetype="downvote" data-postpk="{{page_post.pk}}"></button>
+                    {% else %}
+                    <button class="{{page_post.pk}}-downvotebtn downvoteBtn voteBtn fas fa-chevron-down mx-3 n-border-outline" style="font-size: 1.1rem;" data-votetype="downvote" data-postpk="{{page_post.pk}}"></button>
+                    {% endif %}
+
+                    <span class="text-success fw-bold {{page_post.pk}}-votecount">{{page_post.get_vote_count}}</span>
+
+                    {% if voted.1 == True %}
+                    <button class="{{page_post.pk}}-upvotebtn text-primary upvoteBtn voteBtn fas fa-chevron-up mx-3 n-border-outline" style="font-size: 1.1rem;" data-votetype="upvote" data-postpk="{{page_post.pk}}"></button>
+                    {% else %}
+                    <button class="{{page_post.pk}}-upvotebtn upvoteBtn voteBtn fas fa-chevron-up mx-3 n-border-outline" style="font-size: 1.1rem;" data-votetype="upvote" data-postpk="{{page_post.pk}}"></button>
+                    {% endif %}
+                {% else %}
+                    <button data-bs-toggle="modal" data-bs-target="#login_modal" class="show_login_options fas fa-chevron-down mx-3 n-border-outline" style="font-size: 1.1rem;"></button>
+                    <span class="text-success fw-bold {{page_post.pk}}-votecount">{{page_post.get_vote_count}}</span>
+                    <button data-bs-toggle="modal" data-bs-target="#login_modal" class="show_login_options fas fa-chevron-up mx-3 n-border-outline" style="font-size: 1.1rem;"></button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div id="post_comment" class="mt-5 mb-2 bg-white px-3 py-4">
+        <div class="comment_top px-3 border-bottom mb-3">
+            <h5 class="user-select-none"><span class="comment_count comment_count_{{page_post.pk}}">{{comment_count}}</span> comments</h5>
+            <div class="d-flex space-between mt-5">
+                <div class="profile__header__nav profile_header_off bg-white tabbed py-0" style="flex: 1;">
+                    <ul class="c_scroll">
+                        <button data-order="first" class="active comment_filter link-blue text-dark n-border-outline">Newest First</button>
+                        <button data-order="last" class="comment_filter link-blue text-dark n-border-outline">Oldest First</button>
+                        <button data-order="popular" class="comment_filter link-blue text-dark n-border-outline">Popular</button>
+                    </ul>
+                </div>
+                <div>
+                    <button class="fs-5 n-border-outline far fa-bell"></button>
+                </div>
+            </div>
+        </div>
+        <div class="comment_box px-3">
+            <div class="add_comment comment_comment px-3 py-3">
+                {% if request.user.is_authenticated %}
+                    <form id="comment_form">
+                        <textarea rows="6" id="comment_input" placeholder="Write a comment..." maxlength="1000" minlength="10"></textarea>
+                        <div id="commentPreview" class="mb-3 user-select-none">
+                            <div id="commentImage" class="d-inline-block"></div>
+                            <div id="commentLink" class="d-inline-block"></div>
+                            <div id="commentDonate" class="d-inline-block"></div>
+                        </div>
+                        <div class="comment_options d-flex space-between">
+                            <div class="d-flex">
+                                <button type="button" id="comment_link" class="fas fa-link n-border-outline border btn-bx-s my-auto d-block bg-white ripple py-2 px-2"></button>
+                                <label for="comment_image_input" class="far fa-image n-border-outline border btn-bx-s my-auto d-block bg-white ripple d-block mx-2 fs-4 py-1 px-1" style="cursor: pointer;"></label>
+                                <input type="file" accept="image/*" id="comment_image_input" class="d-none">
+                                <button type="button" class="fas fa-ruble-sign n-border-outline border btn-bx-s my-auto d-block bg-white ripple py-2 px-2"></button>
+                            </div>
+                            <div>
+                                <button data-pk="{{page_post.pk}}" type="submit" id="comment_submit" class="btn-bx-s e_comment_options transp-btn blue_button text-white ripple" disabled>Post</button>
+                            </div>
+                        </div>
+                    </form>
+                {% else %}
+                    <button class="n-border-outline show_login_options w-100" data-bs-toggle="modal" data-bs-target="#login_modal">Login to comment</button>
+                {% endif %}
+            </div>
+            <div id="commentsContent" class="mt-4" data-postpk="{{page_post.pk}}"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,116 @@
+{% load validate_bookmark %}
+{% load validate_vote %}
+{% load comment_count %}
+<div class="_post mx-auto {% if gapping != False %}mt-2{% endif %} mb-2 bg-white user-select-none"> <!-- used '_post', because, don't know where all I must have used the class post -->
+    <!-- caption, and post options here -->
+    <div class="_post__top px-3 py-2">
+        <div class="d-flex space-between mb-3 {% if gapping != False %}mt-1{% endif %}">
+            <a href="/u/{{post_obj.user.pk}}/" class="d-flex my-auto">
+                <div class="my-auto">
+                    {% include 'components/photo.component.html' with src=post_obj.user.profile.avatar alt=post_obj.user.username dim="30px" bradius="5px" %}
+                </div>
+                <div class="mx-2 my-auto d-flex">
+                    <span style="font-size: 1.1rem;" class="d-block fw-bold">{{post_obj.user.username}}</span>
+                    <span style="font-size: 1.1rem;" class="text-secondary d-block mx-3">{{post_obj.date}} @ {{post_obj.time}}</span>
+                </div>
+            </a>
+            {% if post_obj.published == False %}
+                <i class="fas fa-lock d-block my-auto" title="Private article"></i>
+            {% endif %}
+            <div class="d-flex my-auto">
+                <div class="dropdown my-auto">
+                    <button onclick="showDropdown('{{post_obj.pk}}-dropdown')" class="fs-4 dropbtn fas fa-ellipsis-h n-border-outline"></button>
+                    <div id="{{post_obj.pk}}-dropdown" class="dropdown-content">
+                        <div></div>
+                        {% if request.user == post_obj.user %}
+                            <button data-pk="{{post_obj.pk}}" class="edit_post drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Edit</button>
+                            <button class="drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Promote</button>
+                            {% if post_obj.published == True %}
+                                <button data-pk="{{post_obj.pk}}" class="make_post_private drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Unpublish</button>
+                            {% else %}
+                                <button data-pk="{{post_obj.pk}}" class="make_post_public drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Make public</button>
+                            {% endif %}
+                            <button data-pk="{{post_obj.pk}}" class="delete_post drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Delete</button>
+                            {% if post_obj.published == True %}
+                                {% if post_obj.anchored == True %}
+                                    <button data-pk="{{post_obj.pk}}" class="unanchor_post drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Unanchor</button>
+                                {% else %}
+                                    <button data-pk="{{post_obj.pk}}" class="anchor_post drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Anchor</button>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <button class="drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Hide</button>
+                        {% endif %}
+                        <button class="drop_elem w-100 d-flex n-border-outline my-auto px-3 py-2">Complain</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/u/{{post_obj.user.pk}}/{{post_obj.pk}}/" class="d-block post_block_anchor">
+            {% if post_obj.get_head != None %}
+            <h3>{{post_obj.get_head|safe}}</h3>
+            {% endif %}
+
+            <a href="/u/{{post_obj.user.pk}}/{{post_obj.pk}}/" class="d-block mt-4">Read the full article...</a>
+        </a>
+    </div>
+
+    <!-- actual post image, video here -->
+    <div class="_post__middle border-bottom">
+        <a href="/u/{{post_obj.user.pk}}/{{post_obj.pk}}/" class="d-block post_block_anchor">
+            <div class="_post__middle_visual">
+                {% if post_obj.get_visual %}
+                <img class="post_visual" src="{{ post_obj.get_visual }}">
+                {% endif %}
+            </div>
+        </a>
+    </div>
+
+    <!-- upvote downvote etc. here -->
+    <div class="_post__bottom py-2 d-flex space-between" style="font-size: 1.2rem;">
+        <div class="_post__bottom__left">
+            <button class="mx-3 n-border-outline" style="font-size: 1.1rem;">
+                <span class="n-border-outline far fa-comment px-0 py-0"></span>
+                <span class="px-1 py-0 comment_count_{{post_obj.pk}}">{% comment_count post_obj %}</span>
+            </button>
+
+            {% if request.user.is_authenticated %}
+                {% validate_bookmark post_obj request.user as bookmarked %}
+                <div class="d-inline-block mx-3">
+                    {% if bookmarked.0 %}
+                    <button data-postpk="{{post_obj.pk}}" class="bookmarkBtn-{{post_obj.pk}} fw-bold bookmarkBtn n-border-outline n-border-outline far fa-bookmark px-0 py-0" style="font-size: 1.1rem;"></button>
+                    {% else %}
+                    <button data-postpk="{{post_obj.pk}}" class="bookmarkBtn-{{post_obj.pk}} bookmarkBtn n-border-outline n-border-outline far fa-bookmark px-0 py-0" style="font-size: 1.1rem;"></button>
+                    {% endif %}
+                    <span class="bookmark_count px-1">{{bookmarked.1}}</span>
+                </div>
+            {% else %}
+                <button data-bs-toggle="modal" data-bs-target="#login_modal" class="show_login_options mx-3 n-border-outline n-border-outline far fa-bookmark px-0 py-0" style="font-size: 1.1rem;"></button>
+            {% endif %}
+
+            <button class="mx-3 n-border-outline n-border-outline fas fa-share px-0 py-0" style="font-size: 1.1rem;"></button>
+        </div>
+        <div class="_post__bottom__right">
+            {% if request.user.is_authenticated %}
+                {% validate_vote post_obj request.user as voted %}
+                {% if voted.0 == True %}
+                <button class="{{post_obj.pk}}-downvotebtn text-primary downvoteBtn voteBtn fas fa-chevron-down mx-3 n-border-outline" style="font-size: 1.1rem;" data-votetype="downvote" data-postpk="{{post_obj.pk}}"></button>
+                {% else %}
+                <button class="{{post_obj.pk}}-downvotebtn downvoteBtn voteBtn fas fa-chevron-down mx-3 n-border-outline" style="font-size: 1.1rem;" data-votetype="downvote" data-postpk="{{post_obj.pk}}"></button>
+                {% endif %}
+
+                <span class="text-success fw-bold {{post_obj.pk}}-votecount">{{post_obj.get_vote_count}}</span>
+
+                {% if voted.1 == True %}
+                <button class="{{post_obj.pk}}-upvotebtn text-primary upvoteBtn voteBtn fas fa-chevron-up mx-3 n-border-outline" style="font-size: 1.1rem;" data-votetype="upvote" data-postpk="{{post_obj.pk}}"></button>
+                {% else %}
+                <button class="{{post_obj.pk}}-upvotebtn upvoteBtn voteBtn fas fa-chevron-up mx-3 n-border-outline" style="font-size: 1.1rem;" data-votetype="upvote" data-postpk="{{post_obj.pk}}"></button>
+                {% endif %}
+            {% else %}
+                <button data-bs-toggle="modal" data-bs-target="#login_modal" class="show_login_options fas fa-chevron-down mx-3 n-border-outline" style="font-size: 1.1rem;"></button>
+                <span class="text-success fw-bold {{post_obj.pk}}-votecount">{{post_obj.get_vote_count}}</span>
+                <button data-bs-toggle="modal" data-bs-target="#login_modal" class="show_login_options fas fa-chevron-up mx-3 n-border-outline" style="font-size: 1.1rem;"></button>
+            {% endif %}
+        </div>
+    </div>
+</div>

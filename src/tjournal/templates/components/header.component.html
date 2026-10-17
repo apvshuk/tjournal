@@ -1,0 +1,102 @@
+<header class="header">
+    <div class="header_content d-flex">
+        <div class="header__left d-flex">
+            <div class="header__left__sidebar_toggle my-auto px-3">
+                <button class="toggleSidebar fas fa-bars n-border-outline my-auto d-block"></button>
+            </div>
+            <div class="header__left__logo my-auto px-2">
+                <a {% if request.path != '' %}href="/"{% endif %}>
+                    {% include 'components/logo.component.html' with width='43px' %}
+                </a>
+            </div>
+            <div class="header__left__search my-auto px-2">
+                <input type="search" class="orange-outline search_input py-2" placeholder="Search" style="border-color: transparent;border-radius: 8px;">
+            </div>
+            <div class="header__left__new_entry my-auto px-2">
+                {% if request.user.is_authenticated %}
+                <button class="transp-btn newEntryToggle bg-white btn-bx-s my-auto d-block py-2" data-bs-toggle="modal" data-bs-target="#new_entry_modal">New entry</button>
+                {% else %}
+                <button class="transp-btn show_login_options bg-white btn-bx-s my-auto d-block py-2" data-bs-toggle="modal" data-bs-target="#login_modal">New entry</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="header__right d-flex">            
+            <div class="header__right__search_small my-auto px-2">
+                <button class="fas fa-search link-orange n-border-outline my-auto d-block" id="showSmallScreenInp"></button>
+            </div>
+            {% if request.user.is_authenticated %}
+            <div class="header__right__messages my-auto px-2">
+                <button class="far fa-comment-alt link-orange n-border-outline my-auto d-block"></button>
+            </div>
+            {% endif %}
+            <div class="header__right__notification my-auto px-2">
+                <button class="far fa-bell link-orange n-border-outline my-auto d-block"></button>
+            </div>
+            {% if not request.user.is_authenticated %}
+            <div class="header__right__login my-auto px-3">
+                <button class="far fa-user-circle show_login_options link-orange n-border-outline my-auto d-block d-flex" data-bs-toggle="modal" data-bs-target="#login_modal"><span class="fm-roboto px-2 d-block my-auto" style="font-size: 18px;">To come in</span></button>
+            </div>
+            {% else %}
+            <div class="header__right__login my-auto px-3 d-flex">
+                <a href="/u/{{user.pk}}/">
+                    {% include 'components/photo.component.html' with src=profile.avatar alt=profile.user.username dim="43px" bradius="5px" %}
+                </a>
+                <div class="dropdown my-auto">
+                    <button onclick="showDropdown('header_drop')" class="dropbtn fas fa-caret-down n-border-outline"></button>
+                    <div id="header_drop" class="dropdown-content">
+                        <div style="padding-left: 8px;margin-top: 3px;margin-bottom: 3px;">
+                            <small>Profile</small>
+                        </div>
+                        <a href="/u/{{user.pk}}/" class="d-flex">
+                            <div class="icon_container my-auto">
+                                {% include 'components/photo.component.html' with src=profile.avatar alt=profile.user.username dim="18px" bradius='100%' %}
+                            </div>
+                            <span class="my-auto px-2">{{user.username}}</span>
+                        </a>
+                        <a href="#" class="d-flex">
+                            <div class="icon_container my-auto">
+                                <i class="fas fa-donate"></i>
+                            </div>
+                            <span class="my-auto px-2">Donates</span>
+                        </a>
+                        <a href="#" class="d-flex">
+                            <div class="icon_container my-auto">
+                                <i class="fas fa-bookmark"></i>
+                            </div>
+                            <span class="my-auto px-2">Bookmarks</span>
+                        </a>
+                        <a href="/accounts/settings/" class="d-flex">
+                            <div class="icon_container my-auto">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span class="my-auto px-2">Settings</span>
+                        </a>
+						<form action="/accounts/logout/" method="POST">
+							{% csrf_token %}
+							<button class="d-flex text-danger w-100 drop_elem n-border-outline">
+								<div class="icon_container my-auto">
+									<i class="fas fa-sign-out-alt"></i>
+								</div>
+								<span class="my-auto px-2">Logout</span>
+							</button>
+						</form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="search_small">
+        <div class="my-auto">
+            <input type="search" id="search_input_small" class="orange-outline search_input w-100" style="border-color: transparent;border-radius: 8px;" placeholder="Search">
+        </div>
+    </div>
+    <div id="loader"></div>
+</header>
+
+{% if request.user.is_authenticated %}
+{% include 'components/editor_modal.component.html' %}
+{% else %}
+{% include 'components/login/login_modal.component.html' %}
+{% endif %}

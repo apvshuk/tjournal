@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block head_title %}Tjournal{% endblock %}
+
+{% block extra_head %}
+<!-- add css and others (warning: no javascript to be added here) -->
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    {% for i in tj_posts %}
+        {% if i.published == True %}
+            {% include 'components/post.component.html' with post_obj=i %}
+        {% elif i.user == request.user %}
+            {% include 'components/post.component.html' with post_obj=i %}
+        {% endif %}
+    {% endfor %}
+</div>
+
+{% endblock %}
